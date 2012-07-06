@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 //import android.graphics.Path;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -433,7 +434,6 @@ public class DrawingView extends View {
 							if ( cursor.getType() == MyCursor.TYPE_DRAGGING ) {
 								// complete a lasso selection
 								selectedShapes.clear();
-
 								// Need to transform the positions of the cursor from pixels to world space coordinates.
 								// We will store the world space coordinates in the following data structure.
 								ArrayList< Point2D > lassoPolygonPoints = new ArrayList< Point2D >();
@@ -452,6 +452,8 @@ public class DrawingView extends View {
 							}
 						}
 						break;
+					
+					//plan: 
 					case MODE_CREER :
 						if ( type == MotionEvent.ACTION_DOWN ) {
 							if ( cursorContainer.getNumCursorsOfGivenType(MyCursor.TYPE_DRAGGING) == 1 )
@@ -464,18 +466,19 @@ public class DrawingView extends View {
 							// no further updating necessary here
 						}
 						else if ( type == MotionEvent.ACTION_UP ) {
+							Log.v("UP", "bouton lacher");
 							if ( cursor.getType() == MyCursor.TYPE_DRAGGING ) {
 								// complete a lasso selection
 								selectedShapes.clear();
-
+								
 								// Need to transform the positions of the cursor from pixels to world space coordinates.
 								// We will store the world space coordinates in the following data structure.
-								ArrayList< Point2D > lassoPolygonPoints = new ArrayList< Point2D >();
+								ArrayList< Point2D > PolygonPoints = new ArrayList< Point2D >();
 								for ( Point2D p : cursor.getPositions() )
-									lassoPolygonPoints.add( gw.convertPixelsToWorldSpaceUnits( p ) );
+									PolygonPoints.add( gw.convertPixelsToWorldSpaceUnits( p ) );
 
 								for ( Shape s : shapeContainer.shapes ) {
-									if ( s.isContainedInLassoPolygon( lassoPolygonPoints ) ) {
+									if ( s.isContainedInLassoPolygon( PolygonPoints ) ) {
 										selectedShapes.add( s );
 									}
 								}
