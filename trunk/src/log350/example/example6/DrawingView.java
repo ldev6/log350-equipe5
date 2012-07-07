@@ -370,12 +370,12 @@ public class DrawingView extends View {
 								currentMode = MODE_CREER;
 								cursor.setType( MyCursor.TYPE_BUTTON );
 							}
-							else if ( indexOfShapeBeingManipulated >= 0  ) {
-								currentMode = MODE_SHAPE_MANIPULATION;
-								cursor.setType( MyCursor.TYPE_DRAGGING );
-							}
 							else if (selectedShapes.size()!=0 && cursorContainer.getNumCursors() == 1  ) {
 								currentMode = MODE_SELECTEDSHAPE_MANIPULATION;
+								cursor.setType( MyCursor.TYPE_DRAGGING );
+							}
+							else if ( indexOfShapeBeingManipulated >= 0  ) {
+								currentMode = MODE_SHAPE_MANIPULATION;
 								cursor.setType( MyCursor.TYPE_DRAGGING );
 							}
 							else {
@@ -428,23 +428,22 @@ public class DrawingView extends View {
 						if ( cursorContainer.getNumCursors() == 1 && type == MotionEvent.ACTION_MOVE ) {
 							MyCursor cursor0 = cursorContainer.getCursorByIndex( 0 );
 							Log.v("Debug","ETRANGE");
+						
 							for(int i=0; i<selectedShapes.size(); i++){
 								
-								Point2DUtil.transformPointsBasedOnDisplacementOfOnePoint(
+								Point2DUtil.translationForm(
 										selectedShapes.get(i).getPoints(),
 										gw.convertPixelsToWorldSpaceUnits( cursor0.getPreviousPosition() ),
 										gw.convertPixelsToWorldSpaceUnits( cursor0.getCurrentPosition() )
 									);
 							}
-						//	Shape shape = shapeContainer.getShape( indexOfShapeBeingManipulated );
-								
-							
 						}
 						else if ( type == MotionEvent.ACTION_UP ) {
 							cursorContainer.removeCursorByIndex( cursorIndex );
 							if ( cursorContainer.getNumCursors() == 0 ) {
 								currentMode = MODE_NEUTRAL;
 								selectedShapes.clear();
+								indexOfShapeBeingManipulated = -1;
 							}
 						}
 						break;

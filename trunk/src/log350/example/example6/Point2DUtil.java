@@ -398,6 +398,25 @@ public class Point2DUtil {
 		}
 	}
 
+	
+	//Translate
+	static public void  translationForm(ArrayList<Point2D> points,
+		// these should, of course, be in the same coordinate system as the points to transform
+		Point2D P_old,
+		Point2D P_new){
+		
+		Vector2D v1 =  new Vector2D( P_old );
+		Vector2D v2 =  new Vector2D( P_new );
+	
+		Vector2D translation = Point2D.diff( P_old, P_new);
+
+		for ( Point2D p : points ) {
+			p.get()[0] -=  translation.x() ;
+			p.get()[1] -=  translation.y() ;
+		}		
+	}
+	
+	
 	// This can be used to implement bimanual (2-handed) manipulation,
 	// or 2-finger manipulation, as in a "pinch" gesture
 	static public void compute2DTransformBasedOnDisplacementOfTwoPoints(
