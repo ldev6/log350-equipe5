@@ -187,7 +187,7 @@ public class DrawingView extends View {
 	int indexOfShapeBeingManipulated = -1;
 
 	MyButton lassoButton = new MyButton( "Lasso", 10, 70, 140, 100 );
-	MyButton creerButton = new MyButton( "CrÃ©er", 10, 190, 140, 100);
+	MyButton creerButton = new MyButton( "Créer", 10, 190, 140, 100);
 	
 	OnTouchListener touchListener;
 	
@@ -359,6 +359,7 @@ public class DrawingView extends View {
 					switch ( currentMode ) {
 					case MODE_NEUTRAL :
 						if ( cursorContainer.getNumCursors() == 1 && type == MotionEvent.ACTION_DOWN ) {
+							
 							Point2D p_pixels = new Point2D(x,y);
 							Point2D p_world = gw.convertPixelsToWorldSpaceUnits( p_pixels );
 							indexOfShapeBeingManipulated = shapeContainer.indexOfShapeContainingGivenPoint( p_world );
@@ -396,6 +397,12 @@ public class DrawingView extends View {
 								cursor1.getCurrentPosition()
 							);
 						}
+						else if(cursorContainer.getNumCursors() == 1 && type == MotionEvent.ACTION_MOVE){
+							MyCursor cursor0 = cursorContainer.getCursorByIndex( 0 );
+							float xPan = (cursor0.getPreviousPosition().x() - cursor0.getCurrentPosition().x()) * -1;
+							float yPan = (cursor0.getPreviousPosition().y() - cursor0.getCurrentPosition().y()) * -1;
+							gw.pan(xPan, yPan);
+						}
 						else if ( type == MotionEvent.ACTION_UP ) {
 							cursorContainer.removeCursorByIndex( cursorIndex );
 							if ( cursorContainer.getNumCursors() == 0 )
@@ -403,7 +410,20 @@ public class DrawingView extends View {
 						}
 						break;
 					case MODE_SHAPE_MANIPULATION :
-						if ( cursorContainer.getNumCursors() == 2 && type == MotionEvent.ACTION_MOVE && indexOfShapeBeingManipulated>=0 ) {
+						if (cursorContainer.getNumCursors() == 1 && type == MotionEvent.ACTION_MOVE && indexOfShapeBeingManipulated>=0) {
+							
+							Log.v("Debug","ETRANGE2");
+							MyCursor cursor0 = cursorContainer.getCursorByIndex( 0 );
+							Shape shape = shapeContainer.getShape( indexOfShapeBeingManipulated );
+							
+							
+							Point2DUtil.translationForm(
+									shape.getPoints(),
+									gw.convertPixelsToWorldSpaceUnits( cursor0.getPreviousPosition() ), 
+									gw.convertPixelsToWorldSpaceUnits( cursor0.getCurrentPosition() ));
+							
+						}
+						else if ( cursorContainer.getNumCursors() == 2 && type == MotionEvent.ACTION_MOVE && indexOfShapeBeingManipulated>=0 ) {
 							MyCursor cursor0 = cursorContainer.getCursorByIndex( 0 );
 							MyCursor cursor1 = cursorContainer.getCursorByIndex( 1 );
 							Shape shape = shapeContainer.getShape( indexOfShapeBeingManipulated );
@@ -427,6 +447,7 @@ public class DrawingView extends View {
 					case MODE_SELECTEDSHAPE_MANIPULATION:
 						if ( cursorContainer.getNumCursors() == 1 && type == MotionEvent.ACTION_MOVE ) {
 							MyCursor cursor0 = cursorContainer.getCursorByIndex( 0 );
+							
 							Log.v("Debug","ETRANGE");
 						
 							for(int i=0; i<selectedShapes.size(); i++){
