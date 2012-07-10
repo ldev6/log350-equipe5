@@ -181,6 +181,7 @@ public class DrawingView extends View {
 	static final int MODE_LASSO = 3; // the user is drawing a lasso to select shapes
 	static final int MODE_CREER = 4;
 	static final int MODE_SELECTEDSHAPE_MANIPULATION = 5;
+	static final int MODE_ENCADRER = 6;
 	int currentMode = MODE_NEUTRAL;
 
 	// This is only used when currentMode==MODE_SHAPE_MANIPULATION, otherwise it is equal to -1
@@ -189,6 +190,9 @@ public class DrawingView extends View {
 	MyButton lassoButton = new MyButton( "Lasso", 10, 70, 140, 100 );
 	MyButton creerButton = new MyButton( "Créer", 10, 190, 140, 100);
 	
+	// FF: fonction ENCADRER, modif 1
+	MyButton encadrerButton = new MyButton( "Encadrer", 10, 310, 140, 100);
+
 	OnTouchListener touchListener;
 	
 	public DrawingView(Context context) {
@@ -260,6 +264,9 @@ public class DrawingView extends View {
 
 		lassoButton.draw( gw, currentMode == MODE_LASSO );
 		creerButton.draw( gw, currentMode == MODE_CREER );
+		
+		// FF: fonction ENCADRER, modif 2
+		encadrerButton.draw( gw, currentMode == MODE_ENCADRER );
 
 		if ( currentMode == MODE_LASSO) {
 			MyCursor lassoCursor = cursorContainer.getCursorByType( MyCursor.TYPE_DRAGGING, 0 );
@@ -279,12 +286,24 @@ public class DrawingView extends View {
 			}
 		}
 		
+		// FF: fonction ENCADRER, modif 3 {
+		if ( currentMode == MODE_ENCADRER) {
+			MyCursor encadrerCursor = cursorContainer.getCursorByType( MyCursor.TYPE_DRAGGING, 0 );
+
+			if ( encadrerCursor != null ) {
+				gw.setColor(1.0f,0.0f,0.0f,0.5f);
+				gw.fillPolygon( encadrerCursor.getPositions() );
+			}
+		}
+		// FF: fonction ENCADRER, modif 3 }
 
 		if ( cursorContainer.getNumCursors() > 0 ) {
 			gw.setFontHeight( 30 );
 			gw.setLineWidth( 2 );
 			gw.setColor( 1.0f, 1.0f, 1.0f );
-			gw.drawString( 50, 50, "[" + cursorContainer.getNumCursors() + " contacts]");
+			// FF: fonction ENCADRER, modif 4
+			gw.drawString( 10, 30, "[ mode: " + currentMode + " ]");
+			gw.drawString( 10, 60, "[ " + cursorContainer.getNumCursors() + " contacts ]");
 		}
 
 	}
@@ -371,6 +390,12 @@ public class DrawingView extends View {
 								currentMode = MODE_CREER;
 								cursor.setType( MyCursor.TYPE_BUTTON );
 							}
+							// FF: fonction ENCADRER, modif 6 {
+							else if (encadrerButton.contains(p_pixels)) {
+								currentMode = MODE_ENCADRER;
+								cursor.setType( MyCursor.TYPE_BUTTON );
+							}
+							// FF: fonction ENCADRER, modif 6 }
 							else if (selectedShapes.size()!=0 && cursorContainer.getNumCursors() == 1  ) {
 								currentMode = MODE_SELECTEDSHAPE_MANIPULATION;
 								cursor.setType( MyCursor.TYPE_DRAGGING );
@@ -538,6 +563,30 @@ public class DrawingView extends View {
 							}
 						}
 						break;
+						
+					// FF: fonction ENCADRER, modif 5 {
+					case MODE_ENCADRER:
+						if ( type == MotionEvent.ACTION_UP ) {
+							// Si aucunes shapes n'est sélectionnées
+							if(selectedShapes.size() == 0) {
+								
+								// Encadrer sur l'ensemble des shapes
+								gw.frame(shapeContainer.getBoundingRectangle(),true);
+								
+							// Si une ou plusieurs shape sont sélectionnées
+							} else {
+								
+								// Encadrer sur l'ensemble des shapes sélectionnées
+								// gw.frame(selectedShapes.getBoundingRectangle(),true)
+							}
+							cursorContainer.removeCursorByIndex( cursorIndex );
+							// currentMode = MODE_NEUTRAL;
+						}
+						if ( cursorContainer.getNumCursors() == 0 ) {
+							currentMode = MODE_NEUTRAL;
+						}
+						break;
+					// FF: fonction ENCADRER, modif 5 }
 					}
 					
 					v.invalidate();
