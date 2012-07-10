@@ -172,7 +172,8 @@ public class DrawingView extends View {
 	GraphicsWrapper gw = new GraphicsWrapper();
 
 	ShapeContainer shapeContainer = new ShapeContainer();
-	ArrayList< Shape > selectedShapes = new ArrayList< Shape >();
+	// FF: fonction ENCADRER, modif 10
+	ShapeContainer selectedShapes = new ShapeContainer();
 	CursorContainer cursorContainer = new CursorContainer();
 
 	static final int MODE_NEUTRAL = 0; // the default mode
@@ -514,7 +515,8 @@ public class DrawingView extends View {
 								for ( Point2D p : cursor.getPositions() )
 									lassoPolygonPoints.add( gw.convertPixelsToWorldSpaceUnits( p ) );
 
-								for ( Shape s : shapeContainer.shapes ) {
+								// FF: fonction ENCADRER, modif 8
+								for ( Shape s : shapeContainer ) {
 									if ( s.isContainedInLassoPolygon( lassoPolygonPoints ) ) {
 										selectedShapes.add( s );
 									}
@@ -551,7 +553,8 @@ public class DrawingView extends View {
 								for ( Point2D p : cursor.getPositions() )
 									PolygonPoints.add( gw.convertPixelsToWorldSpaceUnits( p ) );
 
-								for ( Shape s : shapeContainer.shapes ) {
+								// FF: fonction ENCADRER, modif 9
+								for ( Shape s : shapeContainer ) {
 									if ( s.isContainedInLassoPolygon( PolygonPoints ) ) {
 										selectedShapes.add( s );
 									}
@@ -577,7 +580,7 @@ public class DrawingView extends View {
 							} else {
 								
 								// Encadrer sur l'ensemble des shapes sélectionnées
-								// gw.frame(selectedShapes.getBoundingRectangle(),true)
+								gw.frame(selectedShapes.getBoundingRectangle(),true);
 							}
 							cursorContainer.removeCursorByIndex( cursorIndex );
 							// currentMode = MODE_NEUTRAL;
