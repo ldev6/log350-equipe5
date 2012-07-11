@@ -183,6 +183,7 @@ public class DrawingView extends View {
 	static final int MODE_CREER = 4;
 	static final int MODE_SELECTEDSHAPE_MANIPULATION = 5;
 	static final int MODE_ENCADRER = 6;
+	static final int MODE_EFFACER =7;
 	int currentMode = MODE_NEUTRAL;
 
 	// This is only used when currentMode==MODE_SHAPE_MANIPULATION, otherwise it is equal to -1
@@ -190,6 +191,7 @@ public class DrawingView extends View {
 
 	MyButton lassoButton = new MyButton( "Lasso", 10, 70, 140, 100 );
 	MyButton creerButton = new MyButton( "Créer", 10, 190, 140, 100);
+	MyButton effacerButton = new MyButton( "Effacer", 10,430, 140, 100);
 	
 	// FF: fonction ENCADRER, modif 1
 	MyButton encadrerButton = new MyButton( "Encadrer", 10, 310, 140, 100);
@@ -265,6 +267,7 @@ public class DrawingView extends View {
 
 		lassoButton.draw( gw, currentMode == MODE_LASSO );
 		creerButton.draw( gw, currentMode == MODE_CREER );
+		effacerButton.draw( gw, currentMode == MODE_EFFACER );
 		
 		// FF: fonction ENCADRER, modif 2
 		encadrerButton.draw( gw, currentMode == MODE_ENCADRER );
@@ -284,6 +287,15 @@ public class DrawingView extends View {
 			if ( creerCursor != null ) {
 				gw.setColor(1.0f,0.0f,0.0f,0.5f);
 				gw.fillPolygon( creerCursor.getPositions() );
+			}
+		}
+		
+		if ( currentMode == MODE_EFFACER) {
+			MyCursor effacerCursor = cursorContainer.getCursorByType( MyCursor.TYPE_DRAGGING, 0 );
+
+			if ( effacerCursor != null ) {
+				gw.setColor(1.0f,0.0f,0.0f,0.5f);
+				gw.fillPolygon( effacerCursor.getPositions() );
 			}
 		}
 		
@@ -404,6 +416,10 @@ public class DrawingView extends View {
 							else if ( indexOfShapeBeingManipulated >= 0  ) {
 								currentMode = MODE_SHAPE_MANIPULATION;
 								cursor.setType( MyCursor.TYPE_DRAGGING );
+							}
+							else if (effacerButton.contains(p_pixels)){
+								currentMode= MODE_EFFACER;
+								cursor.setType(MyCursor.TYPE_BUTTON);
 							}
 							else {
 								currentMode = MODE_CAMERA_MANIPULATION;
@@ -564,6 +580,28 @@ public class DrawingView extends View {
 							if ( cursorContainer.getNumCursors() == 0 ) {
 								currentMode = MODE_NEUTRAL;
 							}
+						}
+						break;
+						
+					case MODE_EFFACER:
+						if ( cursorContainer.getNumCursors() == 2 /*&& type == MotionEvent.ACTION_MOVE && indexOfShapeBeingManipulated>=0*/ ) {
+							
+							MyCursor cursor1 = cursorContainer.getCursorByIndex( 1 );
+							
+							Point2D p_world = gw.convertPixelsToWorldSpaceUnits( cursor1.getCurrentPosition() );
+														
+							int index = shapeContainer.indexOfShapeContainingGivenPoint(p_world);	
+							
+							if(index > -1)
+							{
+								//Shape shape = shapeContainer.getShape( index );
+							
+								shapeContainer.remove(index);
+							}
+						}
+						cursorContainer.removeCursorByIndex( cursorIndex );
+						if ( cursorContainer.getNumCursors() == 0 ) {
+							currentMode = MODE_NEUTRAL;
 						}
 						break;
 						
