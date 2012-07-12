@@ -2,6 +2,7 @@
 package log350.example.example6;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 //import java.util.List;
 
 import android.content.Context;
@@ -94,8 +95,8 @@ class MyCursor {
 // For example, if an instance of this class is storing 3 cursors,
 // their ids may be 2, 18, 7,
 // but their indices should be 0, 1, 2.
-class CursorContainer {
-	private ArrayList< MyCursor > cursors = new ArrayList< MyCursor >();
+class CursorContainer extends ArrayList< MyCursor > {
+	public ArrayList< MyCursor > cursors = new ArrayList< MyCursor >();
 
 	public int getNumCursors() { return cursors.size(); }
 	public MyCursor getCursorByIndex( int index ) { return cursors.get( index ); }
@@ -190,7 +191,7 @@ public class DrawingView extends View {
 	int indexOfShapeBeingManipulated = -1;
 
 	MyButton lassoButton = new MyButton( "Lasso", 10, 70, 140, 100 );
-	MyButton creerButton = new MyButton( "Créer", 10, 190, 140, 100);
+	MyButton creerButton = new MyButton( "Crï¿½er", 10, 190, 140, 100);
 	MyButton effacerButton = new MyButton( "Effacer", 10,430, 140, 100);
 	
 	// FF: fonction ENCADRER, modif 1
@@ -274,7 +275,7 @@ public class DrawingView extends View {
 
 		if ( currentMode == MODE_LASSO) {
 			MyCursor lassoCursor = cursorContainer.getCursorByType( MyCursor.TYPE_DRAGGING, 0 );
-			MyCursor creerCursor = cursorContainer.getCursorByType( MyCursor.TYPE_DRAGGING, 0 );
+			
 			if ( lassoCursor != null ) {
 				gw.setColor(1.0f,0.0f,0.0f,0.5f);
 				gw.fillPolygon( lassoCursor.getPositions() );
@@ -282,11 +283,16 @@ public class DrawingView extends View {
 		}
 		
 		if ( currentMode == MODE_CREER) {
-			MyCursor creerCursor = cursorContainer.getCursorByType( MyCursor.TYPE_DRAGGING, 0 );
-
-			if ( creerCursor != null ) {
+			ArrayList<Point2D> tempShape = new ArrayList<Point2D>();
+			for ( MyCursor c : cursorContainer.cursors ) {
+				if ( c.type == MyCursor.TYPE_DRAGGING ) {
+						tempShape.add(c.getCurrentPosition());
+				}
+			}
+			//a besoin de au moin 3 points pour dessiner
+			if (  cursorContainer.getNumCursorsOfGivenType(MyCursor.TYPE_DRAGGING)>=3) {
 				gw.setColor(1.0f,0.0f,0.0f,0.5f);
-				gw.fillPolygon( creerCursor.getPositions() );
+				gw.fillPolygon( Point2DUtil.computeConvexHull(tempShape) );
 			}
 		}
 		
@@ -545,24 +551,32 @@ public class DrawingView extends View {
 						}
 						break;
 					
-					//plan: 
 					case MODE_CREER :
 						if ( type == MotionEvent.ACTION_DOWN ) {
-							if ( cursorContainer.getNumCursorsOfGivenType(MyCursor.TYPE_DRAGGING) == 1 )
-								// there's already a finger dragging out the lasso
-								cursor.setType(MyCursor.TYPE_IGNORE);
-							else
-								cursor.setType(MyCursor.TYPE_DRAGGING);
+									cursor.setType(MyCursor.TYPE_DRAGGING);
 						}
 						else if ( type == MotionEvent.ACTION_MOVE ) {
 							// no further updating necessary here
 						}
 						else if ( type == MotionEvent.ACTION_UP ) {
+							if ( cursor.getType() == MyCursor.TYPE_BUTTON ) {
+								if (cursorContainer.getNumCursorsOfGivenType(MyCursor.TYPE_DRAGGING)>=3){
+									ArrayList temporaryShape = new ArrayList();
+									for ( MyCursor c : cursorContainer.cursors ) {
+										if ( c.type == MyCursor.TYPE_DRAGGING ) {
+											temporaryShape.add(  gw.convertPixelsToWorldSpaceUnits(c.getCurrentPosition()));
+										}
+										}
+									shapeContainer.addShape( Point2DUtil.computeConvexHull(temporaryShape)  );
+									temporaryShape.clear();
 							Log.v("UP", "bouton lacher");
+							}
+							}
+							
+							/**
 							if ( cursor.getType() == MyCursor.TYPE_DRAGGING ) {
 								// complete a lasso selection
-								selectedShapes.clear();
-								
+																
 								// Need to transform the positions of the cursor from pixels to world space coordinates.
 								// We will store the world space coordinates in the following data structure.
 								ArrayList< Point2D > PolygonPoints = new ArrayList< Point2D >();
@@ -576,6 +590,7 @@ public class DrawingView extends View {
 									}
 								}
 							}
+							*/
 							cursorContainer.removeCursorByIndex( cursorIndex );
 							if ( cursorContainer.getNumCursors() == 0 ) {
 								currentMode = MODE_NEUTRAL;
@@ -608,16 +623,16 @@ public class DrawingView extends View {
 					// FF: fonction ENCADRER, modif 5 {
 					case MODE_ENCADRER:
 						if ( type == MotionEvent.ACTION_UP ) {
-							// Si aucunes shapes n'est sélectionnées
+							// Si aucunes shapes n'est sï¿½lectionnï¿½es
 							if(selectedShapes.size() == 0) {
 								
 								// Encadrer sur l'ensemble des shapes
 								gw.frame(shapeContainer.getBoundingRectangle(),true);
 								
-							// Si une ou plusieurs shape sont sélectionnées
+							// Si une ou plusieurs shape sont sï¿½lectionnï¿½es
 							} else {
 								
-								// Encadrer sur l'ensemble des shapes sélectionnées
+								// Encadrer sur l'ensemble des shapes sï¿½lectionnï¿½es
 								gw.frame(selectedShapes.getBoundingRectangle(),true);
 							}
 							cursorContainer.removeCursorByIndex( cursorIndex );
