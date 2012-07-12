@@ -191,7 +191,7 @@ public class DrawingView extends View {
 	int indexOfShapeBeingManipulated = -1;
 
 	MyButton lassoButton = new MyButton( "Lasso", 10, 70, 140, 100 );
-	MyButton creerButton = new MyButton( "Cr�er", 10, 190, 140, 100);
+	MyButton creerButton = new MyButton( "Creer", 10, 190, 140, 100);
 	MyButton effacerButton = new MyButton( "Effacer", 10,430, 140, 100);
 	
 	// FF: fonction ENCADRER, modif 1
@@ -282,14 +282,20 @@ public class DrawingView extends View {
 			}
 		}
 		
+		//MODE CREER: Maintenir le bouton enfonce et toucher au endroit des coin des formes et relacher le bouton une fois terminer
+		//QUAND le bouton est activer
 		if ( currentMode == MODE_CREER) {
+			//forme temporaire
 			ArrayList<Point2D> tempShape = new ArrayList<Point2D>();
-			for ( MyCursor c : cursorContainer.cursors ) {
-				if ( c.type == MyCursor.TYPE_DRAGGING ) {
-						tempShape.add(c.getCurrentPosition());
-				}
+		
+			//dirty code ( accessing directly a public array of a class)(inpired by code under)
+			for (MyCursor c : cursorContainer.cursors) {
+				if (c.type == MyCursor.TYPE_DRAGGING) {
+					tempShape.add(c.getCurrentPosition());
+					}
 			}
-			//a besoin de au moin 3 points pour dessiner
+			
+			//besoin de au moin 3 points pour dessiner
 			if (  cursorContainer.getNumCursorsOfGivenType(MyCursor.TYPE_DRAGGING)>=3) {
 				gw.setColor(1.0f,0.0f,0.0f,0.5f);
 				gw.fillPolygon( Point2DUtil.computeConvexHull(tempShape) );
@@ -573,25 +579,7 @@ public class DrawingView extends View {
 							}
 							}
 							
-							/**
-							if ( cursor.getType() == MyCursor.TYPE_DRAGGING ) {
-								// complete a lasso selection
-																
-								// Need to transform the positions of the cursor from pixels to world space coordinates.
-								// We will store the world space coordinates in the following data structure.
-								ArrayList< Point2D > PolygonPoints = new ArrayList< Point2D >();
-								for ( Point2D p : cursor.getPositions() )
-									PolygonPoints.add( gw.convertPixelsToWorldSpaceUnits( p ) );
-
-								// FF: fonction ENCADRER, modif 9
-								for ( Shape s : shapeContainer ) {
-									if ( s.isContainedInLassoPolygon( PolygonPoints ) ) {
-										selectedShapes.add( s );
-									}
-								}
-							}
-							*/
-							cursorContainer.removeCursorByIndex( cursorIndex );
+								cursorContainer.removeCursorByIndex( cursorIndex );
 							if ( cursorContainer.getNumCursors() == 0 ) {
 								currentMode = MODE_NEUTRAL;
 							}
